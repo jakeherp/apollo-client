@@ -37,10 +37,11 @@ const cache = new InMemoryCache();
 const link = new HttpLink({
   uri: "https://server-afz9orqws.now.sh/"
 });
+
 const client = new ApolloClient({
   cache,
   link: new HttpLink({
-    uri: "http://localhost:4000/graphql",
+    uri: "https://server-afz9orqws.now.sh/graphql",
     headers: {
       authorization: localStorage.getItem("token")
     }
@@ -55,6 +56,22 @@ cache.writeData({
     cartItems: []
   }
 });
+
+const IS_LOGGED_IN = gql`
+  query IsUserLoggedIn {
+    isLoggedIn @client
+  }
+`;
+
+injectStyles();
+ReactDOM.render(
+  <ApolloProvider client={client}>
+    <Query query={IS_LOGGED_IN}>
+      {({ data }) => (data.isLoggedIn ? <Pages /> : <Login />)}
+    </Query>
+  </ApolloProvider>,
+  document.getElementById("root")
+);
 
 ReactDOM.render(
   <ApolloProvider client={client}>
