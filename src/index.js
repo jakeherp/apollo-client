@@ -1,15 +1,16 @@
-import React, { Fragment } from "react";
+import React from "react";
 import ReactDOM from "react-dom";
-import { Query } from "react-apollo";
-import gql from "graphql-tag";
 
 import { ApolloClient } from "apollo-client";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { HttpLink } from "apollo-link-http";
-import { ApolloProvider } from "react-apollo";
+import { Query, ApolloProvider } from "react-apollo";
+import gql from "graphql-tag";
 
 import Pages from "./pages";
-import { LaunchTile, Header, Button, Loading } from "../components";
+import Login from "./pages/login";
+import { resolvers, typeDefs } from "./resolvers";
+import injectStyles from "./styles";
 
 const GET_LAUNCHES = gql`
   query launchList($after: String) {
@@ -38,7 +39,21 @@ const link = new HttpLink({
 });
 const client = new ApolloClient({
   cache,
-  link
+  link: new HttpLink({
+    uri: "http://localhost:4000/graphql",
+    headers: {
+      authorization: localStorage.getItem("token")
+    }
+  }),
+  resolvers,
+  typeDefs
+});
+
+cache.writeData({
+  data: {
+    isLoggedIn: !!localStorage.getItem("token"),
+    cartItems: []
+  }
 });
 
 ReactDOM.render(
